@@ -20,7 +20,7 @@ from mitiq.benchmarks import (
     generate_rotated_rb_circuits,
     generate_w_circuit,
 )
-from mitiq.interface import convert_from_mitiq
+from mitiq.interface import convert_from_mitiq, convert_to_mitiq
 from mitiq.pec import execute_with_pec
 from mitiq.pec.representations import (
     represent_operation_with_local_biased_noise,
@@ -324,9 +324,16 @@ class Settings:
         circuits = []
         for i, benchmark in enumerate(self.benchmarks):
             circuit_type = benchmark["circuit_type"]
-            num_qubits = benchmark["num_qubits"]
-            # Set default to return correct type
-            depth = benchmark.get("circuit_depth", -1)
+            circuit: Any
+            if circuit_type == "custom":
+                user_circuit = benchmark["circuit"]
+                circuit = convert_to_mitiq(user_circuit)[0]
+                num_qubits = len(circuit.all_qubits())
+                depth = len(circuit)
+                ideal = benchmark.get("ideal_distribution", {})
+            else:
+                num_qubits = benchmark["num_qubits"]
+                depth = benchmark.get("circuit_depth", -1)
             if circuit_type == "ghz":
                 circuit = generate_ghz_circuit(num_qubits)
                 ideal = {"0" * num_qubits: 0.5, "1" * num_qubits: 0.5}
@@ -367,10 +374,13 @@ class Settings:
                 raise NotImplementedError(
                     "quantum volume circuits not yet supported in calibration"
                 )
+            elif circuit_type == "custom":
+                # ideal distribution already set above (may be empty)
+                pass
             else:
                 raise ValueError(
                     "invalid value passed for `circuit_types`. Must be "
-                    "one of `ghz`, `rb`, `mirror`, `w`, or `qv`, "
+                    "one of `ghz`, `rb`, `mirror`, `w`, `qv`, or `custom`, "
                     f"but got {circuit_type}."
                 )
 

@@ -243,7 +243,7 @@ class Calibrator:
         self.ideal_executor = (
             Executor(ideal_executor)
             if ideal_executor and not isinstance(ideal_executor, Executor)
-            else None
+            else ideal_executor
         )
         self.settings = settings
         self.problems = settings.make_problems()
@@ -264,6 +264,40 @@ class Calibrator:
 
         self._cirq_executor = Executor(cirq_execute)  # type: ignore [arg-type]
 
+        # Executor for ideal circuits if provided
+        if self.ideal_executor is not None:
+            ideal_exec: Executor = self.ideal_executor
+
+            def ideal_cirq_execute(
+                circuits: Sequence[cirq.Circuit],
+            ) -> Sequence[MeasurementResult]:
+                q_programs = [
+                    convert_from_mitiq(c, frontend) for c in circuits
+                ]
+                results = cast(
+                    Sequence[MeasurementResult],
+                    ideal_exec.run(q_programs),
+                )
+                return results
+
+            self._ideal_cirq_executor: Optional[Executor] = Executor(
+                ideal_cirq_execute  # type: ignore[arg-type]
+            )
+        else:
+            self._ideal_cirq_executor = None
+
+        # Populate ideal distributions for custom circuits if needed
+        if self._ideal_cirq_executor is not None:
+            for problem in self.problems:
+                if problem.type == "custom" and not problem.ideal_distribution:
+                    circ = problem.circuit.copy()
+                    circ.append(cirq.measure(circ.all_qubits()))
+                    result = cast(
+                        MeasurementResult,
+                        self._ideal_cirq_executor.run([circ])[0],
+                    )
+                    problem.ideal_distribution = result.prob_distribution()
+
     @property
     def cirq_executor(self) -> Executor:
         """Returns an executor which is able to run Cirq circuits
@@ -276,6 +310,12 @@ class Calibrator:
             Executor which takes as input a Cirq circuits.
         """
         return self._cirq_executor
+
+    @property
+    def ideal_cirq_executor(self) -> Optional[Executor]:
+        """Executor running ideal circuits if provided."""
+
+        return self._ideal_cirq_executor
 
     def get_cost(self) -> Dict[str, int]:
         """Returns the expected number of noisy and ideal expectation values
