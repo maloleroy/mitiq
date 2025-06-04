@@ -10,6 +10,7 @@ from mitiq.zne.zne import (
     construct_circuits,
     combine_results,
 )
+from mitiq.zne.viz import visualize_fits
 from mitiq.zne import scaling
 from mitiq.zne.inference import (
     mitiq_curve_fit,
