@@ -41,7 +41,7 @@ def prepare_logical_0_state_for_5_1_3_code():
     """
 
     def gram_schmidt(
-        orthogonal_vecs: List[np.ndarray],
+        orthogonal_vecs: list[np.ndarray],
     ) -> np.ndarray:
         # normalize input
         orthonormalVecs = [
@@ -112,7 +112,6 @@ We define an [executor](executors.md) function which inputs a circuit and return
 Here for sake of example we use a simulator that adds single-qubit depolarizing noise after each moment and returns the final density matrix.
 
 ```{code-cell} ipython3
-from typing import List
 import numpy as np
 import cirq
 from mitiq import QPROGRAM, Observable, PauliString, qse
@@ -133,7 +132,7 @@ We define an observable in the code subspace: $O = ZZZZZ$.
 As an example, assume that we wish to compute the expectation value $\mathrm{tr}[\rho O]$ of the observable $O$.
 
 ```{code-cell} ipython3
-def get_observable_in_code_space(observable: List[cirq.PauliString]):
+def get_observable_in_code_space(observable: list[cirq.PauliString]):
     FIVE_I = PauliString("IIIII")
     projector_onto_code_space = [
         PauliString("XZZXI"),

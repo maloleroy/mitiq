@@ -4,9 +4,10 @@
 # LICENSE file in the root directory of this source tree.
 
 import warnings
+from collections.abc import Callable, Sequence
 from enum import Enum
 from operator import itemgetter
-from typing import Callable, Dict, List, Optional, Sequence, Tuple, Union, cast
+from typing import cast
 
 import cirq
 import numpy as np
@@ -43,7 +44,7 @@ class ExperimentResults:
     for computing results based on it."""
 
     def __init__(
-        self, strategies: List[Strategy], problems: List[BenchmarkProblem]
+        self, strategies: list[Strategy], problems: list[BenchmarkProblem]
     ) -> None:
         self.strategies = strategies
         self.problems = problems
@@ -78,7 +79,7 @@ class ExperimentResults:
 
     def _get_errors(
         self, strategy_id: int, problem_id: int
-    ) -> Tuple[float, float]:
+    ) -> tuple[float, float]:
         """Get errors for a given strategy/problem combination.
 
         Returns:
@@ -121,10 +122,10 @@ class ExperimentResults:
             │ Two qubit gate count: 1  │ Scale method: fold_global    │ Improvement factor: 0.9369 │
             └──────────────────────────┴──────────────────────────────┴────────────────────────────┘
         """  # noqa: E501
-        table: List[List[Union[str, float]]] = []
-        headers: List[str] = ["benchmark", "strategy", "performance"]
+        table: list[list[str | float]] = []
+        headers: list[str] = ["benchmark", "strategy", "performance"]
         for problem in self.problems:
-            row_group: List[List[Union[str, float]]] = []
+            row_group: list[list[str | float]] = []
             for strategy in self.strategies:
                 nerr, merr = self._get_errors(strategy.id, problem.id)
                 row_group.append(
@@ -162,12 +163,12 @@ class ExperimentResults:
             │ Scale method: fold_global    │ Improvement factor: 2.7672 │ Improvement factor: 0.6852 │
             └──────────────────────────────┴────────────────────────────┴────────────────────────────┘
         """  # noqa: E501
-        table: List[List[str]] = []
-        headers: List[str] = ["strategy\\benchmark"]
+        table: list[list[str]] = []
+        headers: list[str] = ["strategy\\benchmark"]
         for problem in self.problems:
             headers.append(str(problem))
         for strategy in self.strategies:
-            row: List[str] = [str(strategy)]
+            row: list[str] = [str(strategy)]
             for problem in self.problems:
                 nerr, merr = self._get_errors(strategy.id, problem.id)
                 row.append(self._performance_str(nerr, merr))
@@ -229,13 +230,13 @@ class Calibrator:
 
     def __init__(
         self,
-        executor: Union[Executor, Callable[[QPROGRAM], QuantumResult]],
+        executor: Executor | Callable[[QPROGRAM], QuantumResult],
         *,
         frontend: str,
         settings: Settings = ZNE_SETTINGS,
-        ideal_executor: Union[
-            Executor, Callable[[QPROGRAM], QuantumResult], None
-        ] = None,
+        ideal_executor: Executor
+        | Callable[[QPROGRAM], QuantumResult]
+        | None = None,
     ):
         self.executor = (
             executor if isinstance(executor, Executor) else Executor(executor)
@@ -280,7 +281,7 @@ class Calibrator:
                 )
                 return results
 
-            self._ideal_cirq_executor: Optional[Executor] = Executor(
+            self._ideal_cirq_executor: Executor | None = Executor(
                 ideal_cirq_execute  # type: ignore[arg-type]
             )
         else:
@@ -312,12 +313,11 @@ class Calibrator:
         return self._cirq_executor
 
     @property
-    def ideal_cirq_executor(self) -> Optional[Executor]:
+    def ideal_cirq_executor(self) -> Executor | None:
         """Executor running ideal circuits if provided."""
-
         return self._ideal_cirq_executor
 
-    def get_cost(self) -> Dict[str, int]:
+    def get_cost(self) -> dict[str, int]:
         """Returns the expected number of noisy and ideal expectation values
         required for calibration.
 
@@ -326,7 +326,8 @@ class Calibrator:
         """
         num_circuits = len(self.problems)
         num_options = sum(
-            strategy.num_circuits_required() for strategy in self.strategies
+            strategy.num_circuits_required()  # type: ignore
+            for strategy in self.strategies  # type: ignore
         )
 
         noisy = num_circuits * (num_options + 1)
@@ -336,7 +337,7 @@ class Calibrator:
             "ideal_executions": ideal,
         }
 
-    def run(self, log: Optional[OutputForm] = None) -> None:
+    def run(self, log: OutputForm | None = None) -> None:
         """Runs all the circuits required for calibration.
 
         args:
@@ -404,9 +405,9 @@ class Calibrator:
     def execute_with_mitigation(
         self,
         circuit: QPROGRAM,
-        expval_executor: Union[Executor, Callable[[QPROGRAM], QuantumResult]],
-        observable: Optional[Observable] = None,
-    ) -> Union[QuantumResult, None]:
+        expval_executor: Executor | Callable[[QPROGRAM], QuantumResult],
+        observable: Observable | None = None,
+    ) -> QuantumResult | None:
         """See :func:`execute_with_mitigation` for signature and details."""
         return execute_with_mitigation(
             circuit, expval_executor, observable, calibrator=self
@@ -444,11 +445,11 @@ def convert_to_expval_executor(executor: Executor, bitstring: str) -> Executor:
 
 def execute_with_mitigation(
     circuit: QPROGRAM,
-    executor: Union[Executor, Callable[[QPROGRAM], QuantumResult]],
-    observable: Optional[Observable] = None,
+    executor: Executor | Callable[[QPROGRAM], QuantumResult],
+    observable: Observable | None = None,
     *,
     calibrator: Calibrator,
-) -> Union[QuantumResult, None]:
+) -> QuantumResult | None:
     """Estimates the error-mitigated expectation value associated to the
     input circuit, via the application of the best mitigation strategy, as
     determined by calibration.

@@ -9,7 +9,7 @@
 
 import warnings
 from itertools import product
-from typing import Any, Optional
+from typing import Any
 
 import numpy as np
 from cirq import Circuit
@@ -57,7 +57,7 @@ def sample_matrix(
     input_circuit: Circuit,
     degree: int,
     fold_multiplier: int,
-    num_chunks: Optional[int] = None,
+    num_chunks: int | None = None,
 ) -> NDArray[Any]:
     r"""
     Defines the square sample matrix required for multivariate extrapolation as
@@ -127,7 +127,7 @@ def multivariate_richardson_coefficients(
     input_circuit: Circuit,
     degree: int,
     fold_multiplier: int,
-    num_chunks: Optional[int] = None,
+    num_chunks: int | None = None,
 ) -> list[float]:
     r"""
     Defines the function to find the linear combination coefficients from the
@@ -173,9 +173,9 @@ def multivariate_richardson_coefficients(
             + "large sample matrix is calculated through "
             + "`np.linalg.slogdet`."
         )
-        sign, logdet = np.linalg.slogdet(  # pragma: no cover
+        sign, logdet = np.linalg.slogdet(
             input_sample_matrix
-        )
+        )  # pragma: no cover
         det = sign * np.exp(logdet)  # pragma: no cover
 
     if np.isinf(det):

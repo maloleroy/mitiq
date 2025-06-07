@@ -34,7 +34,7 @@ We begin by importing the relevant modules and libraries that we will require
 for the rest of this tutorial.
 
 ```{code-cell} ipython3
-from typing import List, Callable
+from collections.abc import Callable
 import numpy as np
 from matplotlib import pyplot as plt
 
@@ -159,7 +159,7 @@ else:
 def ibm_executor(
     circuit: qiskit.QuantumCircuit,
     shots: int,
-    correct_bitstring: List[int],
+    correct_bitstring: list[int],
     noisy: bool = True,
 ) -> float:
     """Executes the input circuit(s) and returns ⟨A⟩, where 

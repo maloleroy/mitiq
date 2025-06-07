@@ -6,7 +6,6 @@
 """Unit tests for PEC."""
 
 from functools import partial
-from typing import List, Optional
 from unittest.mock import patch
 
 import cirq
@@ -36,8 +35,8 @@ from mitiq.pec.representations import (
 # Noisy representations of Pauli and CNOT operations for testing.
 def get_pauli_and_cnot_representations(
     base_noise: float,
-    qubits: Optional[List[cirq.Qid]] = None,
-) -> List[OperationRepresentation]:
+    qubits: list[cirq.Qid] | None = None,
+) -> list[OperationRepresentation]:
     if qubits is None:
         qreg = cirq.LineQubit.range(2)
     else:
@@ -77,7 +76,7 @@ def serial_executor(circuit: QPROGRAM, noise: float = BASE_NOISE) -> float:
     )[0, 0].real
 
 
-def batched_executor(circuits) -> List[float]:
+def batched_executor(circuits) -> list[float]:
     return [serial_executor(circuit) for circuit in circuits]
 
 
@@ -85,7 +84,9 @@ def noiseless_serial_executor(circuit: QPROGRAM) -> float:
     return serial_executor(circuit, noise=0.0)
 
 
-def fake_executor(circuit: cirq.Circuit, random_state: np.random.RandomState):
+def fake_executor(
+    circuit: cirq.Circuit, random_state: np.random.RandomState
+) -> float:
     """A fake executor which just samples from a normal distribution."""
     return random_state.randn()
 
@@ -174,7 +175,7 @@ def test_execute_with_pec_cirq_noiseless_decomposition(circuit):
 
 
 @pytest.mark.parametrize("nqubits", [1, 2])
-def test_pyquil_noiseless_decomposition_multiqubit(nqubits):
+def test_pyquil_noiseless_decomposition_multiqubit(nqubits: int):
     circuit = pyquil.Program(pyquil.gates.H(q) for q in range(nqubits))
 
     # Decompose H(q) for each qubit q into Paulis.
@@ -203,7 +204,7 @@ def test_pyquil_noiseless_decomposition_multiqubit(nqubits):
 
 
 @pytest.mark.parametrize("nqubits", [1, 2])
-def test_qiskit_noiseless_decomposition_multiqubit(nqubits):
+def test_qiskit_noiseless_decomposition_multiqubit(nqubits: int):
     qreg = [qiskit.QuantumRegister(1) for _ in range(nqubits)]
     circuit = qiskit.QuantumCircuit(*qreg)
     for q in qreg:
@@ -326,7 +327,7 @@ def test_execute_with_pec_partial_representations():
 
 @pytest.mark.parametrize("circuit", [oneq_circ, twoq_circ])
 @pytest.mark.parametrize("seed", (2, 3))
-def test_execute_with_pec_with_different_samples(circuit, seed):
+def test_execute_with_pec_with_different_samples(circuit, seed: int):
     """Tests that, on average, the error decreases as the number of samples is
     increased.
     """
@@ -367,7 +368,7 @@ def test_execute_with_pec_error_scaling(num_samples: int):
 
 
 @pytest.mark.parametrize("precision", [0.2, 0.1])
-def test_precision_option_used_in_num_samples(precision):
+def test_precision_option_used_in_num_samples(precision: float):
     """Tests that the 'precision' argument is used to deduce num_samples."""
     circuits, _, _ = construct_circuits(
         oneq_circ,
@@ -397,7 +398,7 @@ def test_precision_ignored_when_num_samples_present():
 
 
 @pytest.mark.parametrize("bad_value", (0, -1, 2))
-def test_bad_precision_argument(bad_value):
+def test_bad_precision_argument(bad_value: int):
     """Tests that if 'precision' is not within (0, 1] an error is raised."""
     with pytest.raises(ValueError, match="The value of 'precision' should"):
         construct_circuits(
@@ -631,7 +632,7 @@ def test_doc_is_preserved():
 
 
 @pytest.mark.parametrize("circuit_type", SUPPORTED_PROGRAM_TYPES.keys())
-def test_executed_circuits_have_the_expected_type(circuit_type):
+def test_executed_circuits_have_the_expected_type(circuit_type: str):
     circuit = convert_from_mitiq(oneq_circ, circuit_type)
     circuit_type = type(circuit)
 

@@ -5,7 +5,8 @@
 
 """Functions for mapping circuits to (near) Clifford circuits."""
 
-from typing import Any, List, Optional, Sequence, Union, cast
+from collections.abc import Sequence
+from typing import Any, cast
 
 import cirq
 import numpy as np
@@ -27,9 +28,9 @@ def generate_training_circuits(
     fraction_non_clifford: float,
     method_select: str = "uniform",
     method_replace: str = "closest",
-    random_state: Optional[Union[int, np.random.RandomState]] = None,
+    random_state: int | np.random.RandomState | None = None,
     **kwargs: Any,
-) -> List[Circuit]:
+) -> list[Circuit]:
     r"""Returns a list of (near) Clifford circuits obtained by replacing (some)
     non-Clifford gates in the input circuit by Clifford gates.
     The way in which non-Clifford gates are selected to be replaced is
@@ -100,7 +101,7 @@ def _map_to_near_clifford(
     fraction_non_clifford: float,
     method_select: str = "uniform",
     method_replace: str = "closest",
-    random_state: Optional[np.random.RandomState] = None,
+    random_state: np.random.RandomState | None = None,
     **kwargs: Any,
 ) -> Sequence[cirq.ops.Operation]:
     """Returns the list of non-Clifford operations with some of these replaced
@@ -155,9 +156,9 @@ def _select(
     non_clifford_ops: Sequence[cirq.ops.Operation],
     fraction_non_clifford: float,
     method: str = "uniform",
-    sigma: Optional[float] = 1.0,
-    random_state: Optional[np.random.RandomState] = None,
-) -> List[int]:
+    sigma: float = 1.0,
+    random_state: np.random.RandomState | None = None,
+) -> list[int]:
     """Returns indices of non-Clifford operations selected (to be replaced)
     according to some method.
 
@@ -182,10 +183,7 @@ def _select(
         distribution = 1.0 / num_non_cliff * np.ones(shape=(num_non_cliff,))
     elif method == "gaussian":
         non_clifford_angles = np.array(
-            [
-                op.gate.exponent * np.pi  # type: ignore
-                for op in non_clifford_ops
-            ]
+            [op.gate.exponent * np.pi for op in non_clifford_ops]  # type: ignore
         )
         probabilities = angle_to_proximity(non_clifford_angles, sigma)
         distribution = probabilities / sum(probabilities)
@@ -209,8 +207,8 @@ def _replace(
     non_clifford_ops: Sequence[cirq.ops.Operation],
     method: str = "uniform",
     sigma: float = 1.0,
-    random_state: Optional[np.random.RandomState] = None,
-) -> List[cirq.ops.Operation]:
+    random_state: np.random.RandomState | None = None,
+) -> list[cirq.ops.Operation]:
     """Function that takes the non-Clifford angles and replacement and
     selection specifications, returning the projected angles according to a
     specific method.

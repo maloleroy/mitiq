@@ -5,8 +5,9 @@
 
 """Extrapolation methods for Layerwise Richardson Extrapolation (LRE)"""
 
+from collections.abc import Callable
 from functools import wraps
-from typing import Any, Callable, Optional, Union
+from typing import Any
 
 import numpy as np
 
@@ -27,7 +28,7 @@ def construct_circuits(
     folding_method: Callable[
         [QPROGRAM, float], QPROGRAM
     ] = fold_gates_at_random,  # type: ignore [has-type]
-    num_chunks: Optional[int] = None,
+    num_chunks: int | None = None,
 ) -> list[QPROGRAM]:
     """Given a circuit, degree, fold_multiplier, folding_method, and
        num_chunks, outputs a list of circuits that will be used in LRE.
@@ -59,7 +60,7 @@ def combine_results(
     circuit: QPROGRAM,
     degree: int,
     fold_multiplier: int,
-    num_chunks: Optional[int] = None,
+    num_chunks: int | None = None,
 ) -> float:
     """Computes the error-mitigated expectation value associated to the
     input results from executing the scaled circuits and using the multivariate
@@ -87,14 +88,14 @@ def combine_results(
 
 def execute_with_lre(
     circuit: QPROGRAM,
-    executor: Union[Executor, Callable[[QPROGRAM], QuantumResult]],
+    executor: Executor | Callable[[QPROGRAM], QuantumResult],
     degree: int,
     fold_multiplier: int,
-    observable: Optional[Observable] = None,
+    observable: Observable | None = None,
     folding_method: Callable[
         [QPROGRAM, float], QPROGRAM
     ] = fold_gates_at_random,  # type: ignore [has-type]
-    num_chunks: Optional[int] = None,
+    num_chunks: int | None = None,
 ) -> float:
     r"""
     Defines the executor required for Layerwise Richardson
@@ -144,9 +145,9 @@ def execute_with_lre(
 
     # verify the linear combination coefficients and the calculated expectation
     # values have the same length
-    if len(noise_scaled_circuits) != len(  # pragma: no cover
+    if len(noise_scaled_circuits) != len(
         linear_combination_coeffs
-    ):
+    ):  # pragma: no cover
         raise AssertionError(
             "The number of expectation values are not equal "
             + "to the number of coefficients required for "
@@ -162,11 +163,9 @@ def mitigate_executor(
     executor: Callable[[QPROGRAM], QuantumResult],
     degree: int,
     fold_multiplier: int,
-    observable: Optional[Observable] = None,
-    folding_method: Callable[
-        [Union[Any], float], Union[Any]
-    ] = fold_gates_at_random,
-    num_chunks: Optional[int] = None,
+    observable: Observable | None = None,
+    folding_method: Callable[[Any, float], Any] = fold_gates_at_random,
+    num_chunks: int | None = None,
 ) -> Callable[[QPROGRAM], float]:
     """Returns a modified version of the input `executor` which is
     error-mitigated with layerwise richardson extrapolation (LRE).
@@ -205,6 +204,7 @@ def mitigate_executor(
                 folding_method,
                 num_chunks,
             )
+
     else:
 
         @wraps(executor)
@@ -228,11 +228,11 @@ def mitigate_executor(
 def lre_decorator(
     degree: int,
     fold_multiplier: int,
-    observable: Optional[Observable] = None,
+    observable: Observable | None = None,
     folding_method: Callable[
         [QPROGRAM, float], QPROGRAM
     ] = fold_gates_at_random,
-    num_chunks: Optional[int] = None,
+    num_chunks: int | None = None,
 ) -> Callable[
     [Callable[[QPROGRAM], QuantumResult]], Callable[[QPROGRAM], float]
 ]:

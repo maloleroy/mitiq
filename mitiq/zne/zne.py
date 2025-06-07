@@ -5,8 +5,8 @@
 
 """High-level zero-noise extrapolation tools."""
 
+from collections.abc import Callable, Sequence
 from functools import wraps
-from typing import Callable, List, Optional, Sequence, Union
 
 from mitiq import QPROGRAM, Executor, Observable, QuantumResult
 from mitiq.zne.inference import (
@@ -66,10 +66,10 @@ def combine_results(
 
 def execute_with_zne(
     circuit: QPROGRAM,
-    executor: Union[Executor, Callable[[QPROGRAM], QuantumResult]],
-    observable: Optional[Observable] = None,
+    executor: Executor | Callable[[QPROGRAM], QuantumResult],
+    observable: Observable | None = None,
     *,
-    factory: Optional[Factory] = None,
+    factory: Factory | None = None,
     scale_noise: Callable[[QPROGRAM, float], QPROGRAM] = fold_gates_at_random,  # type: ignore [has-type]
     num_to_average: int = 1,
 ) -> float:
@@ -116,9 +116,9 @@ def execute_with_zne(
 
 def mitigate_executor(
     executor: Callable[[QPROGRAM], QuantumResult],
-    observable: Optional[Observable] = None,
+    observable: Observable | None = None,
     *,
-    factory: Optional[Factory] = None,
+    factory: Factory | None = None,
     scale_noise: Callable[[QPROGRAM, float], QPROGRAM] = fold_gates_at_random,  # type:ignore [has-type]
     num_to_average: int = 1,
 ) -> Callable[[QPROGRAM], float]:
@@ -158,7 +158,7 @@ def mitigate_executor(
     else:
 
         @wraps(executor)
-        def new_executor(circuits: List[QPROGRAM]) -> List[float]:
+        def new_executor(circuits: list[QPROGRAM]) -> list[float]:
             return [
                 execute_with_zne(
                     circuit,
@@ -175,9 +175,9 @@ def mitigate_executor(
 
 
 def zne_decorator(
-    observable: Optional[Observable] = None,
+    observable: Observable | None = None,
     *,
-    factory: Optional[Factory] = None,
+    factory: Factory | None = None,
     scale_noise: Callable[[QPROGRAM, float], QPROGRAM] = fold_gates_at_random,  # type: ignore [has-type]
     num_to_average: int = 1,
 ) -> Callable[
