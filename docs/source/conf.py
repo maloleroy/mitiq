@@ -453,6 +453,9 @@ nbsphinx_thumbnails = {
     "examples/cdr_qrack": "_static/cdr-qrack.png",
     "examples/loschmidt_echo_revival_zne": "_static/loschmidt_echo_qiskit.png",
     "examples/pt_zne": "_static/pt_zne.png",
+    "examples/advanced_error_mitigation_pipeline": (
+        "_static/error_mitigation_pipeline.png"
+    ),
     # default images if no thumbnail is specified
     "examples/*": "_static/mitiq-logo.png",
 }
