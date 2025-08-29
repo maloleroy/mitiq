@@ -127,8 +127,8 @@ def convert_to_mitiq(circuit: QPROGRAM) -> tuple[cirq.Circuit, str]:
     else:
         raise UnsupportedCircuitError(
             f"Circuit from module {package} is not supported.\n\n"
-            f"Please register converters with register_mitiq_converters(),"
-            f"\n or specify a supported Circuit type:"
+            "Please register converters with register_mitiq_converters(),"
+            "\n or specify a supported Circuit type:"
             f"\n {SUPPORTED_PROGRAM_TYPES}"
         )
 
@@ -142,8 +142,8 @@ def convert_to_mitiq(circuit: QPROGRAM) -> tuple[cirq.Circuit, str]:
             "be supported, you can open an issue at "
             "https://github.com/unitaryfoundation/mitiq. \n\n Provided "
             f"circuit has type {type(circuit)} and is:\n\n{circuit}\n\n "
-            f"Circuit types supported by Mitiq are "
-            "\n{SUPPORTED_PROGRAM_TYPES}."
+            "Circuit types supported by Mitiq are "
+            f"\n{SUPPORTED_PROGRAM_TYPES}."
         )
 
     return mitiq_circuit, input_circuit_type
