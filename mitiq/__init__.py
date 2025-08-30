@@ -13,6 +13,7 @@ from mitiq.typing import (
 )
 
 # Utils
+from mitiq.interface import compare_cost
 from mitiq.utils import qem_methods
 
 # Executors and observables.
