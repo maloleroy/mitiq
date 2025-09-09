@@ -1,5 +1,46 @@
 # Changelog
 
+## Version 0.47.0
+
+([Full Changelog](https://github.com/unitaryfoundation/mitiq/compare/v0.46.0...v0.47.0))
+
+### Highlights
+
+A new utility function was added to help compare the cost of QEM circuits, and we've made some quality-of-life fixes to calibration and documentation.
+
+We also added functions to complete the Probabilistic Error Amplification (PEA) workflow!
+This module is still being documented, but the main functions are now available:
+- `mitiq.pea.execute_with_pea`
+- `mitiq.pea.construct_circuits`
+- `mitiq.pea.combine_results`
+
+Give it a shot and let us know if you run into any issues.
+
+Thanks to @q-inho, @bdg221, @natestemen, @Misty-W, and first-time contributor @maloleroy for their work in this release!
+
+#### ✨ Enhancements
+
+- Add `compare_cost` utility function to show overhead of QEM circuits (#2809) [@q-inho]
+- Add functions to complete PEA workflow (#2785) [@Misty-W]
+
+#### 🐛 Bug fixes
+
+- Fix typo in error message (#2822) [@maloleroy]
+- Sort qubits before measurement in calibrator (#2813) [@natestemen]
+- Fix typo (#2811) [@q-inho]
+
+#### 📓 Documentation
+
+- Update calibration screencast in docs (#2823) [@bdg221]
+- Update unitary_foundation_logo.png image file (#2810) [@q-inho]
+
+#### 📦 Dependency Updates
+
+- Bump actions/setup-python from 5 to 6 (#2825) [@dependabot]
+- Bump actions/checkout from 4 to 5 (#2820) [@dependabot]
+- Bump actions/first-interaction from 2 to 3 (#2819) [@dependabot]
+- Bump actions/first-interaction from 1 to 2 (#2807) [@dependabot]
+
 ## Version 0.46.0
 
 ([Full Changelog](https://github.com/unitaryfoundation/mitiq/compare/v0.45.1...v0.46.0))
