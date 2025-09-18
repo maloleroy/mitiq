@@ -110,7 +110,7 @@ def _add_identity_to_idle(
     idle_qubits = set()
     # Get used qubits
     for op in circuit.data:
-        _, qubits, _ = op
+        qubits = op.qubits
         used_qubits.update(set(qubits))
     idle_qubits = all_qubits - used_qubits
     # Modify input circuit applying I to idle qubits
@@ -135,7 +135,7 @@ def _remove_identity_from_idle(
     """
     to_delete_indices: list[int] = []
     for index, op in enumerate(circuit._data):
-        gate, qubits, cbits = op
+        gate, qubits = op.operation, op.qubits
         if gate.name == "id" and set(qubits).intersection(idle_qubits):
             to_delete_indices.append(index)
     # Traverse data from list end to preserve index
@@ -164,7 +164,8 @@ def _measurement_order(
         circuit: Qiskit circuit to get the measurement order of.
     """
     order = []
-    for gate, qubits, cbits in circuit.data:
+    for op in circuit.data:
+        gate, qubits, cbits = op.operation, op.qubits, op.clbits
         if isinstance(gate, qiskit.circuit.Measure):
             if len(qubits) != 1 or len(cbits) != 1:
                 raise ValueError(
